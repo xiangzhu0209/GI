@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// 額外工資的佐證照片。
+//
+// 師傅頁面沒有帳號，因此允許匿名上傳，但限制檔案大小與類型；
+// 上傳後不能再修改或刪除。資料庫存的是含權杖的下載網址，
+// 只有拿到網址的人看得到照片（與原本的公開 bucket 設計相同）。
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /claim-photos/{allPaths=**} {
+      allow read: if true;
+      allow create: if request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update, delete: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
